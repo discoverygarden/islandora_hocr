@@ -1,2 +1,2 @@
 # dgi_hocr
-Add the hocr derivative functionality
+Adds the hOCR derivative functionality
