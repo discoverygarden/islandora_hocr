@@ -11,6 +11,8 @@ use Drupal\taxonomy\Entity\Term;
  * Implements hook_install().
  *
  * Add the hOCR media use term.
+ *
+ * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function dgi_hocr_install() {
   // Generate hOCR media use term.
