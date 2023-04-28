@@ -5,3 +5,4 @@ type: module
 core_version_requirement: ^8 || ^9
 dependencies:
   - islandora:islandora
+  - islandora_core_feature:islandora_core_feature
