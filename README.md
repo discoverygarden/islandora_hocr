@@ -1,6 +1,6 @@
-# dgi_hocr
+# islandora_hocr
 
-# DGI hOCR
+# Islandora hOCR
 
 ## Introduction
 Adds the hOCR derivative functionality. (WIP)
@@ -9,7 +9,7 @@ Adds the hOCR derivative functionality. (WIP)
 Currently, this module provides an install hook. Enabling the module will generate the hOCR (https://discoverygarden.ca/use#hocr) media use term.
 
 ```shell
-drush en dgi_hocr
+drush en islandora_hocr
 ```
 
 ## Installation
