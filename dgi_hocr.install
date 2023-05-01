@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Install file.
+ */
+
+use Drupal\taxonomy\Entity\Term;
+
+/**
+ * Implements hook_install().
+ *
+ * Add the hOCR media use term.
+ *
+ * @throws \Drupal\Core\Entity\EntityStorageException
+ */
+function dgi_hocr_install() {
+  // Generate hOCR media use term.
+  Term::create([
+    'parent' => [],
+    'name' => 'hOCR',
+    'vid' => 'islandora_media_use',
+    'description' => 'hOCR Derivative Term',
+    'field_external_uri' => ['uri' => 'https://discoverygarden.ca/use#hocr'],
+  ])->save();
+}
