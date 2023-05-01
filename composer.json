@@ -1,5 +1,5 @@
 {
-    "name": "discoverygarden/dgi_hocr",
+    "name": "discoverygarden/islandora_hocr",
     "type": "drupal-module",
     "license": "GPL-3.0-or-later",
     "require": {

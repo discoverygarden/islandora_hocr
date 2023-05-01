@@ -14,7 +14,7 @@ use Drupal\taxonomy\Entity\Term;
  *
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
-function dgi_hocr_install() {
+function islandora_hocr_install() {
   // Generate hOCR media use term.
   Term::create([
     'parent' => [],
