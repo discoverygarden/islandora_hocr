@@ -6,6 +6,7 @@
  */
 
 use Drupal\taxonomy\Entity\Term;
+use Drupal\field\Entity\FieldStorageConfig;
 
 /**
  * Implements hook_install().
@@ -15,6 +16,12 @@ use Drupal\taxonomy\Entity\Term;
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function islandora_hocr_install() {
+  $field_storage = Drupal\field\Entity\FieldStorageConfig::loadByName('taxonomy_term', 'field_external_uri');
+  if (empty($field_storage) || !in_array('islandora_media_use', $field_storage->getBundles())) {
+    // Re-import the default config for islandora core feature to make sure fields exist.
+    \Drupal::service('config.installer')->installDefaultConfig('module', 'islandora_core_feature');
+  }
+
   // Generate hOCR media use term.
   Term::create([
     'parent' => [],
@@ -23,4 +30,5 @@ function islandora_hocr_install() {
     'description' => 'hOCR Derivative Term',
     'field_external_uri' => ['uri' => 'https://discoverygarden.ca/use#hocr'],
   ])->save();
+
 }
