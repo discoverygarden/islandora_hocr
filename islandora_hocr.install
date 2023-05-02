@@ -5,8 +5,8 @@
  * Install file.
  */
 
-use Drupal\taxonomy\Entity\Term;
 use Drupal\field\Entity\FieldStorageConfig;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_install().
@@ -16,9 +16,10 @@ use Drupal\field\Entity\FieldStorageConfig;
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function islandora_hocr_install() {
-  $field_storage = Drupal\field\Entity\FieldStorageConfig::loadByName('taxonomy_term', 'field_external_uri');
+  $field_storage = FieldStorageConfig::loadByName('taxonomy_term', 'field_external_uri');
   if (empty($field_storage) || !in_array('islandora_media_use', $field_storage->getBundles())) {
-    // Re-import the default config for islandora core feature to make sure fields exist.
+    // Re-import the default config for islandora
+    // core feature to make sure fields exist.
     \Drupal::service('config.installer')->installDefaultConfig('module', 'islandora_core_feature');
   }
 
