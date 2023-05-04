@@ -2,7 +2,5 @@
     "name": "discoverygarden/islandora_hocr",
     "type": "drupal-module",
     "license": "GPL-3.0-or-later",
-    "require": {
-        "islandora/islandora": "^2"
-    }
+    "require": {}
 }
