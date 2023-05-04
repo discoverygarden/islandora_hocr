@@ -2,6 +2,7 @@
 
 /**
  * @file
+ * Module file.
  */
 
 /**
@@ -32,10 +33,11 @@ use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\Core\Config\FileStorage;
 
 /**
+ * Make sure that fields and config exists.
  *
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
-function _ensure_fields_exist(array $entitytypes_fields) {
+function islandora_hocr_ensure_fields_exist(array $entitytypes_fields) {
   $config_directory = new FileStorage(Settings::get('config_sync_directory'));
   foreach ($entitytypes_fields as $entitytype => $bundles) {
     foreach ($bundles as $bundle => $fields) {

@@ -23,7 +23,7 @@ function islandora_hocr_install() {
     ],
   ];
 
-  _ensure_fields_exist($entitytypes_fields);
+  islandora_hocr_ensure_fields_exist($entitytypes_fields);
 
   // Generate hOCR media use term.
   Term::create([
