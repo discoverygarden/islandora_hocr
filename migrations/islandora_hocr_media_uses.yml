@@ -10,7 +10,7 @@ source:
       description: hOCR Derivative Term
       url: https://discoverygarden.ca/use#hocr
   ids:
-    name:
+    url:
       type: string
 process:
   name: name
