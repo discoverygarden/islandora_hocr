@@ -23,7 +23,7 @@ process:
       entity_type: taxonomy_term
       value_key: field_external_uri
       bundle_key: vid
-      bundle: resource_types
+      bundle: islandora_media_use
     - plugin: skip_on_empty
       method: process
 destination:
