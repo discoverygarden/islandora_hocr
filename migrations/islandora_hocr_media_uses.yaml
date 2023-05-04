@@ -16,7 +16,15 @@ process:
   name: name
   description: description
   field_external_uri: url
-  tid:
+  _tid_from_name:
+    - plugin: entity_lookup
+      ignore_case: true
+      source: name
+      entity_type: taxonomy_term
+      value_key: name
+      bundle_key: vid
+      bundle: islandora_media_use
+  _tid_from_external_url:
     - plugin: entity_lookup
       ignore_case: true
       source: url
@@ -24,6 +32,11 @@ process:
       value_key: field_external_uri
       bundle_key: vid
       bundle: islandora_media_use
+  tid:
+    - plugin: null_coalesce
+      source:
+        - '@_tid_from_external_url'
+        - '@_tid_from_name'
     - plugin: skip_on_empty
       method: process
 destination:
