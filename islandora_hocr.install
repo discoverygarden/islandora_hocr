@@ -5,7 +5,6 @@
  * Install file.
  */
 
-use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\taxonomy\Entity\Term;
 
 /**
@@ -16,12 +15,15 @@ use Drupal\taxonomy\Entity\Term;
  * @throws \Drupal\Core\Entity\EntityStorageException
  */
 function islandora_hocr_install() {
-  $field_storage = FieldStorageConfig::loadByName('taxonomy_term', 'field_external_uri');
-  if (empty($field_storage) || !in_array('islandora_media_use', $field_storage->getBundles())) {
-    // Re-import the default config for islandora
-    // core feature to make sure fields exist.
-    \Drupal::service('config.installer')->installDefaultConfig('module', 'islandora_core_feature');
-  }
+  $entitytypes_fields = [
+    'taxonomy_term' => [
+      'islandora_media_use' => [
+        'field_external_uri',
+      ],
+    ],
+  ];
+
+  _ensure_fields_exist($entitytypes_fields);
 
   // Generate hOCR media use term.
   Term::create([
