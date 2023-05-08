@@ -3,13 +3,17 @@
 # Islandora hOCR
 
 ## Introduction
+
 Adds the hOCR derivative functionality. (WIP)
 
 ## Usage
-Currently, this module provides an install hook. Enabling the module will generate the hOCR (https://discoverygarden.ca/use#hocr) media use term.
+
+Currently, this module contains a migration facilitating the creation of a media use term for use in common Islandora configurations. Enabling the module will expose the `islandora_hocr_media_uses` migration to generate a media use term of the URI `https://discoverygarden.ca/use#hocr`.
 
 ```shell
+# Flow might be something like:
 drush en islandora_hocr
+drush migrate:import islandora_hocr_media_uses
 ```
 
 ## Installation
