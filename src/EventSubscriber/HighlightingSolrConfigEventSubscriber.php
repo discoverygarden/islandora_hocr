@@ -6,6 +6,9 @@ use Drupal\search_api_solr\Event\PostConfigFilesGenerationEvent;
 use Drupal\search_api_solr\Event\SearchApiSolrEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
+/**
+ * Highlighting library event subscriber.
+ */
 class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface {
 
   /**
@@ -52,6 +55,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
    *   The event to which we are responding.
    *
    * @return void
+   *   Nothing.
    */
   public function addLibraryInfo(PostConfigFilesGenerationEvent $event) : void {
     if (!isset($this->libraryPath)) {
