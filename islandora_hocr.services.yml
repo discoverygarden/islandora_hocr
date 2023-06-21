@@ -1,0 +1,7 @@
+---
+services:
+  islandora_hocr.highlighting_solr_config:
+    class: Drupal\islandora_hocr\EventSubscriber\HighlightingSolrConfigEventSubscriber
+    factory: [Drupal\islandora_hocr\EventSubscriber\HighlightingSolrConfigEventSubscriber, create]
+    tags:
+      - name: event_subscriber
