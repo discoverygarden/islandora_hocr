@@ -88,12 +88,17 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
       return;
     }
 
-    $fields = $item->getFields();
     $fields = $this->getFieldsHelper()
-      ->filterForPropertyPath($fields, NULL, static::PROPERTY_NAME);
-    $value = $this->getContent($entity);
-    foreach ($fields as $field) {
-      $field->addValue($value);
+      ->filterForPropertyPath(
+        $item->getFields(),
+        $item->getDatasourceId(),
+        static::PROPERTY_NAME
+      );
+
+    if ($value = $this->getContent($entity)) {
+      foreach ($fields as $field) {
+        $field->addValue($value);
+      }
     }
   }
 
@@ -103,7 +108,7 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
    * @param \Drupal\node\NodeInterface $node
    *   The node for which to obtain content.
    *
-   * @return false|string
+   * @return false|string|void
    *   The content if it was file-backed, FALSE if we failed to read it, or the
    *   empty string if it was _not_ file-backed.
    *
@@ -120,15 +125,22 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
     $media = $query->execute();
 
     $medium = reset($media);
+    if (!$medium) {
+      return;
+    }
 
     /** @var \Drupal\media\MediaInterface $entity */
     $entity = $media_storage->load($medium);
+    if (!$entity) {
+      return;
+    }
 
     $source = $entity->getSource();
 
     if ($source instanceof File) {
-      $source_value = $source->getSourceFieldValue($entity);
-      return file_get_contents($source_value);
+      $fid = $source->getSourceFieldValue($entity);
+      $uri = $this->entityTypeManager->getStorage('file')->load($fid)->getFileUri();
+      return file_get_contents($uri);
     }
 
     // Unsure how to obtain media content, as it is not file-backed.
