@@ -3,12 +3,8 @@
 namespace Drupal\islandora_hocr\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
-use Drupal\Core\Plugin\PluginFormInterface;
-use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
 use Drupal\media\Plugin\media\Source\File;
-use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;

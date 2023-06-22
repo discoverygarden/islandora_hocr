@@ -53,9 +53,6 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
    *
    * @param \Drupal\search_api_solr\Event\PostConfigFilesGenerationEvent $event
    *   The event to which we are responding.
-   *
-   * @return void
-   *   Nothing.
    */
   public function addLibraryInfo(PostConfigFilesGenerationEvent $event) : void {
     if (!isset($this->libraryPath)) {
@@ -69,6 +66,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
     }
     $files['solrconfig_extra.xml'] .= <<<EOXML
 <lib dir="{$this->libraryPath}" regex=".*\\.jar" />
+
 EOXML;
 
     $event->setConfigFiles($files);
