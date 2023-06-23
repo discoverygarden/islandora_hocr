@@ -3,6 +3,8 @@
 namespace Drupal\islandora_hocr\EventSubscriber;
 
 use Drupal\search_api_solr\Event\PostConfigFilesGenerationEvent;
+use Drupal\search_api_solr\Event\PostCreateIndexDocumentEvent;
+use Drupal\search_api_solr\Event\PostFieldMappingEvent;
 use Drupal\search_api_solr\Event\SearchApiSolrEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -45,6 +47,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
   public static function getSubscribedEvents() {
     return [
       SearchApiSolrEvents::POST_CONFIG_FILES_GENERATION => 'addLibraryInfo',
+      SearchApiSolrEvents::POST_FIELD_MAPPING => 'remapField',
     ];
   }
 
@@ -70,6 +73,22 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
 EOXML;
 
     $event->setConfigFiles($files);
+  }
+
+  /**
+   * Remap our field to something single-valued.
+   *
+   * @param \Drupal\search_api_solr\Event\PostFieldMappingEvent $event
+   *
+   * @return void
+   */
+  public function remapField(PostFieldMappingEvent $event) {
+    $mapping = $event->getFieldMapping();
+
+    if (isset($mapping['islandora_hocr_field'])) {
+      $mapping['islandora_hocr_field'] = 'tcislandora_hocrs_X3b_en_islandora_hocr_field';
+      $event->setFieldMapping($mapping);
+    }
   }
 
 }

@@ -86,8 +86,4 @@ field_type:
           class: solr.LowerCaseFilterFactory
         -
           class: solr.RemoveDuplicatesTokenFilterFactory
-solr_configs:
-  searchComponents:
-    -
-      name: ocrHighlight
-      class: solrocr.OcrHighlightComponent
+solr_configs: null

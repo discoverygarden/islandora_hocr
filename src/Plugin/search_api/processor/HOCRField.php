@@ -64,9 +64,10 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
       static::PROPERTY_NAME => new ProcessorProperty([
         'label' => $this->t('HOCR Field'),
         'description' => $this->t('HOCR content from referenced media.'),
-        'type' => 'string',
+        'type' => 'solr_string_storage',
         'processor_id' => $this->getPluginId(),
         'is_list' => FALSE,
+        //'computed' => TRUE,
       ]),
     ];
   }
@@ -88,12 +89,15 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
       return;
     }
 
+    $fields = $item->getFields();
+    //dsm($fields);
     $fields = $this->getFieldsHelper()
       ->filterForPropertyPath(
-        $item->getFields(),
+        $fields,
         $item->getDatasourceId(),
         static::PROPERTY_NAME
       );
+    dsm($fields, 'filtered');
 
     if ($value = $this->getContent($entity)) {
       foreach ($fields as $field) {
