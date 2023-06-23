@@ -75,20 +75,4 @@ EOXML;
     $event->setConfigFiles($files);
   }
 
-  /**
-   * Remap our field to something single-valued.
-   *
-   * @param \Drupal\search_api_solr\Event\PostFieldMappingEvent $event
-   *
-   * @return void
-   */
-  public function remapField(PostFieldMappingEvent $event) {
-    $mapping = $event->getFieldMapping();
-
-    if (isset($mapping['islandora_hocr_field'])) {
-      $mapping['islandora_hocr_field'] = 'tcislandora_hocrs_X3b_en_islandora_hocr_field';
-      $event->setFieldMapping($mapping);
-    }
-  }
-
 }
