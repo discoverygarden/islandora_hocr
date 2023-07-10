@@ -5,9 +5,3 @@ services:
     factory: [Drupal\islandora_hocr\EventSubscriber\HighlightingSolrConfigEventSubscriber, create]
     tags:
       - name: event_subscriber
-  islandora_hocr.request_handler_adjustment:
-    class: Drupal\islandora_hocr\Config\RequestHandlerAdjuster
-    arguments:
-      - '@config.factory'
-    tags:
-      - name: config.factory.override
