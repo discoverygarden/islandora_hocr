@@ -6,10 +6,9 @@ dependencies:
   config:
     - search_api_solr.solr_field_type.islandora_hocr_und_7_0_0
 id: request_handler_select_islandora_hocr_7_0_0
-label: Select
+label: Select w/ OCR Highlighting Component
 minimum_solr_version: 7.0.0
-environments:
-  - islandora_hocr
+environments: { }
 recommended: true
 request_handler:
   name: /select
@@ -54,9 +53,6 @@ request_handler:
           VALUE: stats
         -
           VALUE: debug
-    -
-      name: last-components
-      str:
         -
           VALUE: spellcheck
         -
