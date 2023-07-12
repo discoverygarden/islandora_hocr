@@ -4,13 +4,14 @@ namespace Drupal\islandora_hocr\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\file\FileInterface;
+use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
 use Drupal\media\Plugin\media\Source\File;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Datasource\DatasourceInterface;
 use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
-use Drupal\search_api\Processor\ProcessorProperty;
 use Drupal\search_api\SearchApiException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -61,13 +62,12 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
     }
 
     return [
-      static::PROPERTY_NAME => new ProcessorProperty([
+      static::PROPERTY_NAME => new HOCRFieldProperty([
         'label' => $this->t('HOCR Field'),
-        'description' => $this->t('HOCR content from referenced media.'),
-        'type' => 'solr_string_storage',
+        'description' => $this->t('HOCR from referenced media.'),
         'processor_id' => $this->getPluginId(),
         'is_list' => FALSE,
-        //'computed' => TRUE,
+        'computed' => FALSE,
       ]),
     ];
   }
@@ -89,37 +89,60 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
       return;
     }
 
-    $fields = $item->getFields();
-    //dsm($fields);
-    $fields = $this->getFieldsHelper()
-      ->filterForPropertyPath(
-        $fields,
-        $item->getDatasourceId(),
-        static::PROPERTY_NAME
-      );
-    dsm($fields, 'filtered');
+    $data = [
+      'file' => [
+        'value' => NULL,
+      ],
+      'uri' => [
+        'value' => NULL,
+      ],
+      'content' => [
+        'value' => NULL,
+      ],
+    ];
+    $data['file']['callable'] = function () use ($entity, &$data) {
+      $data['file']['value'] ??= $this->getFile($entity);
+      return $data['file']['value'];
+    };
+    $data['uri']['callable'] = function () use (&$data) {
+      $data['uri']['value'] ??= $data['file']['callable']() ? $data['file']['value']->getFileUri() : NULL;
+      return $data['uri']['value'];
+    };
+    $data['content']['callable'] = function () use (&$data) {
+      $data['content']['value'] ??= $data['uri']['callable']() ? file_get_contents($data['uri']['value']) : NULL;
+      return $data['content']['value'];
+    };
 
-    if ($value = $this->getContent($entity)) {
-      foreach ($fields as $field) {
-        $field->addValue($value);
+    $fields = $item->getFields();
+
+    foreach ($data as $key => $info) {
+      $spec_fields = $this->getFieldsHelper()
+        ->filterForPropertyPath(
+          $fields,
+          $item->getDatasourceId(),
+          static::PROPERTY_NAME . ":$key"
+        );
+      foreach ($spec_fields as $field) {
+        if (!$field->getValues()) {
+          // Lazily load content from entity, as the field might already be
+          // populated.
+          $field->addValue($info['callable']());
+        }
       }
     }
+
   }
 
   /**
-   * Acquire content for the given node.
+   * Find the target file for this node.
    *
    * @param \Drupal\node\NodeInterface $node
-   *   The node for which to obtain content.
+   *   The node for which to find a file containing HOCR.
    *
-   * @return false|string|void
-   *   The content if it was file-backed, FALSE if we failed to read it, or the
-   *   empty string if it was _not_ file-backed.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @return \Drupal\file\FileInterface|null
+   *   The file containing HOCR, or NULL.
    */
-  protected function getContent(NodeInterface $node) {
+  protected function getFile(NodeInterface $node) : ?FileInterface {
     $media_storage = $this->entityTypeManager->getStorage('media');
     $query = $media_storage->getQuery();
 
@@ -130,25 +153,21 @@ class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInt
 
     $medium = reset($media);
     if (!$medium) {
-      return;
+      return NULL;
     }
 
     /** @var \Drupal\media\MediaInterface $entity */
     $entity = $media_storage->load($medium);
     if (!$entity) {
-      return;
+      return NULL;
     }
 
     $source = $entity->getSource();
 
     if ($source instanceof File) {
       $fid = $source->getSourceFieldValue($entity);
-      $uri = $this->entityTypeManager->getStorage('file')->load($fid)->getFileUri();
-      return file_get_contents($uri);
+      return $this->entityTypeManager->getStorage('file')->load($fid);
     }
-
-    // Unsure how to obtain media content, as it is not file-backed.
-    return '';
   }
 
 }

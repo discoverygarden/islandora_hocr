@@ -11,7 +11,7 @@ minimum_solr_version: 7.0.0
 environments: { }
 recommended: true
 request_handler:
-  name: /select
+  name: /select_ocr
   class: solr.SearchHandler
   lst:
     -
