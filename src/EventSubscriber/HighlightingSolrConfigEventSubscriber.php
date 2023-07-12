@@ -2,15 +2,10 @@
 
 namespace Drupal\islandora_hocr\EventSubscriber;
 
-use Drupal\Core\Language\LanguageInterface;
-use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_solr\Event\PostConfigFilesGenerationEvent;
-use Drupal\search_api_solr\Event\PostConvertedQueryEvent;
-use Drupal\search_api_solr\Event\PostCreateIndexDocumentEvent;
 use Drupal\search_api_solr\Event\PostExtractResultsEvent;
-use Drupal\search_api_solr\Event\PostFieldMappingEvent;
 use Drupal\search_api_solr\Event\PreQueryEvent;
 use Drupal\search_api_solr\Event\SearchApiSolrEvents;
 use Drupal\search_api_solr\SolrBackendInterface;
@@ -31,26 +26,21 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
   protected string $libraryPath;
 
   /**
+   * The fields helper service.
+   *
    * @var \Drupal\search_api\Utility\FieldsHelperInterface
    */
   protected FieldsHelperInterface $fieldsHelper;
-
-  /**
-   * @var \Drupal\Core\Language\LanguageManagerInterface
-   */
-  protected LanguageManagerInterface $languageManager;
 
   /**
    * Constructor.
    */
   public function __construct(
     string $library_path,
-    FieldsHelperInterface $fields_helper,
-    LanguageManagerInterface $language_manager
+    FieldsHelperInterface $fields_helper
   ) {
     $this->libraryPath = $library_path;
     $this->fieldsHelper = $fields_helper;
-    $this->languageManager = $language_manager;
   }
 
   /**
@@ -62,8 +52,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
   public static function create() : self {
     return new static(
       getenv('SOLR_HOCR_PLUGIN_PATH'),
-      \Drupal::service('search_api.fields_helper'),
-      \Drupal::languageManager()
+      \Drupal::service('search_api.fields_helper')
     );
   }
 
@@ -156,7 +145,7 @@ EOXML;
     $s_query->setHandler('select_ocr')
       ->addParam('hl', 'true')
       ->addParam('hl.ocr.fl', implode(',', array_keys($highlight_fields)))
-      //
+      // Deal with absolute image coordinates.
       ->addParam('hl.ocr.absoluteHighlights', 'on')
       // We expect OCR per page.
       ->addParam('hl.ocr.trackPages', 'off');

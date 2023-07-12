@@ -4,10 +4,12 @@ namespace Drupal\islandora_hocr\Plugin\search_api\processor\Property;
 
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\TypedData\ComplexDataDefinitionBase;
-use Drupal\search_api\Processor\ProcessorInterface;
 use Drupal\search_api\Processor\ProcessorProperty;
 use Drupal\search_api\Processor\ProcessorPropertyInterface;
 
+/**
+ * HOCR Field property data definition.
+ */
 class HOCRFieldProperty extends ComplexDataDefinitionBase implements ProcessorPropertyInterface {
 
   use StringTranslationTrait;
@@ -60,6 +62,5 @@ class HOCRFieldProperty extends ComplexDataDefinitionBase implements ProcessorPr
   public function isList() {
     return (bool) ($this->definition['is_list'] ?? parent::isList());
   }
-
 
 }
