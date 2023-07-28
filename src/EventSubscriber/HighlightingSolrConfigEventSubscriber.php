@@ -138,7 +138,7 @@ EOXML;
         $highlight_fields[$field] = TRUE;
       }
     }
-
+    unset($info);
     $sapi_query->setOption('islandora_hocr_properties', $highlight_props);
     $sapi_query->setOption('islandora_hocr_fields', $highlight_fields);
 

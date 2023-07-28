@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   hidden = true,
  * )
  */
-class HOCRField extends ProcessorPluginBase implements ContainerFactoryPluginInterface {
+class HOCRField extends ProcessorPluginBase {
 
   use PluginFormTrait;
 
