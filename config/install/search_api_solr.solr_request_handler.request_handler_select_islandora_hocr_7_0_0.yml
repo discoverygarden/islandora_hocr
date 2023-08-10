@@ -1,10 +1,10 @@
 langcode: en
 status: true
 dependencies:
-  module:
-    - islandora_hocr
   config:
     - search_api_solr.solr_field_type.islandora_hocr_und_7_0_0
+  module:
+    - islandora_hocr
 id: request_handler_select_islandora_hocr_7_0_0
 label: Select w/ OCR Highlighting Component
 minimum_solr_version: 7.0.0
