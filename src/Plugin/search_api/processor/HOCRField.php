@@ -3,6 +3,7 @@
 namespace Drupal\islandora_hocr\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
 use Drupal\media\Plugin\media\Source\File;
@@ -147,26 +148,39 @@ class HOCRField extends ProcessorPluginBase {
 
     $query->condition('field_media_of', $node->id());
     $query->condition('field_media_use.entity:taxonomy_term.field_external_uri.uri', 'https://discoverygarden.ca/use#hocr');
+    $query->accessCheck(FALSE);
 
     $media = $query->execute();
 
-    $medium = reset($media);
-    if (!$medium) {
-      return NULL;
+    $anonymous = new AnonymousUserSession();
+
+    foreach ($media as $medium) {
+      /** @var \Drupal\media\MediaInterface $entity */
+      $entity = $media_storage->load($medium);
+      if (!$entity) {
+        continue;
+      }
+      elseif (!$entity->access('view', $anonymous, FALSE)) {
+        continue;
+      }
+
+      $source = $entity->getSource();
+
+      if ($source instanceof File) {
+        $fid = $source->getSourceFieldValue($entity);
+        /** @var \Drupal\file\FileInterface $file */
+        $file = $this->entityTypeManager->getStorage('file')->load($fid);
+
+        if (!$file->access('view', $anonymous, FALSE)) {
+          continue;
+        }
+
+        return $file;
+      }
     }
 
-    /** @var \Drupal\media\MediaInterface $entity */
-    $entity = $media_storage->load($medium);
-    if (!$entity) {
-      return NULL;
-    }
-
-    $source = $entity->getSource();
-
-    if ($source instanceof File) {
-      $fid = $source->getSourceFieldValue($entity);
-      return $this->entityTypeManager->getStorage('file')->load($fid);
-    }
+    // Failed to find anything applicable/visible.
+    return NULL;
   }
 
 }
