@@ -3,7 +3,6 @@
 namespace Drupal\islandora_hocr\Plugin\search_api\processor;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
 use Drupal\media\Plugin\media\Source\File;
@@ -152,15 +151,10 @@ class HOCRField extends ProcessorPluginBase {
 
     $media = $query->execute();
 
-    $anonymous = new AnonymousUserSession();
-
     foreach ($media as $medium) {
       /** @var \Drupal\media\MediaInterface $entity */
       $entity = $media_storage->load($medium);
       if (!$entity) {
-        continue;
-      }
-      elseif (!$entity->access('view', $anonymous, FALSE)) {
         continue;
       }
 
@@ -170,10 +164,6 @@ class HOCRField extends ProcessorPluginBase {
         $fid = $source->getSourceFieldValue($entity);
         /** @var \Drupal\file\FileInterface $file */
         $file = $this->entityTypeManager->getStorage('file')->load($fid);
-
-        if (!$file->access('view', $anonymous, FALSE)) {
-          continue;
-        }
 
         return $file;
       }
