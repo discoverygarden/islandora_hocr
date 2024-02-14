@@ -97,6 +97,10 @@ Current maintainers:
 
 * [discoverygarden](http://www.discoverygarden.ca)
 
+Sponsor:
+
+* [CTDA: Connecticut Digital Archive](https://lib.uconn.edu/find/connecticut-digital-archive/)
+
 ## License
 
 [GPLv3](http://www.gnu.org/licenses/gpl-3.0.txt)
