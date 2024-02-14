@@ -99,7 +99,7 @@ Current maintainers:
 
 Sponsers:
 
-* [CTDA: Connecticut Digital Archive]
+* [CTDA: Connecticut Digital Archive](https://lib.uconn.edu/find/connecticut-digital-archive/)
 
 ## License
 
