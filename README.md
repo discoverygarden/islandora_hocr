@@ -97,7 +97,7 @@ Current maintainers:
 
 * [discoverygarden](http://www.discoverygarden.ca)
 
-Sponsers:
+Sponsor:
 
 * [CTDA: Connecticut Digital Archive](https://lib.uconn.edu/find/connecticut-digital-archive/)
 
