@@ -2,7 +2,11 @@
 
 namespace Drupal\islandora_hocr\Plugin\search_api\processor;
 
+use Drupal\Core\Access\AccessibleInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\PluginFormInterface;
+use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
@@ -29,7 +33,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   hidden = true,
  * )
  */
-class HOCRField extends ProcessorPluginBase {
+class HOCRField extends ProcessorPluginBase implements PluginFormInterface {
 
   use PluginFormTrait;
 
@@ -43,12 +47,23 @@ class HOCRField extends ProcessorPluginBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * Anonymous user session, if we are not skipping the anonymous access check.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected AccountInterface $anonymousSession;
+
+  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
     $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
 
     $instance->entityTypeManager = $container->get('entity_type.manager');
+
+    if (!$instance->configuration['skip_anon_check']) {
+      $instance->anonymousSession = new AnonymousUserSession();
+    }
 
     return $instance;
   }
@@ -152,15 +167,13 @@ class HOCRField extends ProcessorPluginBase {
 
     $media = $query->execute();
 
-    $anonymous = new AnonymousUserSession();
-
     foreach ($media as $medium) {
       /** @var \Drupal\media\MediaInterface $entity */
       $entity = $media_storage->load($medium);
       if (!$entity) {
         continue;
       }
-      elseif (!$entity->access('view', $anonymous, FALSE)) {
+      elseif (!$this->checkEntityAccess($entity)) {
         continue;
       }
 
@@ -171,7 +184,7 @@ class HOCRField extends ProcessorPluginBase {
         /** @var \Drupal\file\FileInterface $file */
         $file = $this->entityTypeManager->getStorage('file')->load($fid);
 
-        if (!$file->access('view', $anonymous, FALSE)) {
+        if (!$this->checkEntityAccess($file)) {
           continue;
         }
 
@@ -181,6 +194,56 @@ class HOCRField extends ProcessorPluginBase {
 
     // Failed to find anything applicable/visible.
     return NULL;
+  }
+
+  /**
+   * Check access for the given entity.
+   *
+   * @param \Drupal\Core\Access\AccessibleInterface $entity
+   *   The entity of which to check access.
+   *
+   * @return bool
+   *   Short-circuits to TRUE if configured to "skip_anon_check"; otherwise,
+   *   the result of an access check against the entity.
+   */
+  protected function checkEntityAccess(AccessibleInterface $entity) : bool {
+    if ($this->configuration['skip_anon_check']) {
+      return TRUE;
+    }
+
+    return $entity->access('view', $this->anonymousSession, FALSE);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function defaultConfiguration() {
+    return [
+      'skip_anon_check' => FALSE,
+    ] + parent::defaultConfiguration();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
+    $form['skip_anon_check'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Skip anonymous user check'),
+      '#description' => $this->t('Allow the indexing of potentially access-controlled content into this index.'),
+      '#default_value' => $this->configuration['skip_anon_check'],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    $this->setConfiguration([
+      'skip_anon_check' => $form_state->getValue('skip_anon_check'),
+    ]);
   }
 
 }
