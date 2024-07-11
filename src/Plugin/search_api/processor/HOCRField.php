@@ -171,7 +171,7 @@ class HOCRField extends ProcessorPluginBase {
         /** @var \Drupal\file\FileInterface $file */
         $file = $this->entityTypeManager->getStorage('file')->load($fid);
 
-        if (!$file->access('view', $anonymous, FALSE)) {
+        if (!$file || !$file->access('view', $anonymous, FALSE)) {
           continue;
         }
 
