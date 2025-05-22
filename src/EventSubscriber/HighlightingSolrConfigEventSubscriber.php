@@ -37,7 +37,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
    */
   public function __construct(
     string $library_path,
-    FieldsHelperInterface $fields_helper
+    FieldsHelperInterface $fields_helper,
   ) {
     $this->libraryPath = $library_path;
     $this->fieldsHelper = $fields_helper;

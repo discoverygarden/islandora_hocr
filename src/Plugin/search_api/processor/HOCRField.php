@@ -56,7 +56,7 @@ class HOCRField extends ProcessorPluginBase {
   /**
    * {@inheritDoc}
    */
-  public function getPropertyDefinitions(DatasourceInterface $datasource = NULL) {
+  public function getPropertyDefinitions(DatasourceInterface|null $datasource = NULL) {
     if (!$datasource || $datasource->getEntityTypeId() != 'node') {
       return [];
     }
