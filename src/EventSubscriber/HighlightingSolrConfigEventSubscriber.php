@@ -141,7 +141,7 @@ EOXML;
     unset($info);
     $sapi_query->setOption('islandora_hocr_properties', $highlight_props);
     $sapi_query->setOption('islandora_hocr_fields', $highlight_fields);
-    $handler = $s_query->setHandler('select_ocr')
+    $s_query->setHandler('select_ocr')
       ->addParam('hl', 'true')
       ->addParam('hl.ocr.fl', implode(',', array_keys($highlight_fields)))
       // Deal with absolute image coordinates.
