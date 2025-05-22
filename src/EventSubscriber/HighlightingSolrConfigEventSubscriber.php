@@ -147,10 +147,9 @@ EOXML;
       // Deal with absolute image coordinates.
       ->addParam('hl.ocr.absoluteHighlights', 'on')
       // We expect OCR per page.
-      ->addParam('hl.ocr.trackPages', 'off');
-    foreach (array_keys($highlight_fields) as $field) {
-      $handler->addParam("f.$field.hl.snippets", getenv('ISLANDORA_HOCR_SNIPPETS') ?: '20');
-    }
+      ->addParam('hl.ocr.trackPages', 'off')
+      // Set the default number of snippets.
+      ->addParam('hl.snippets', getenv('ISLANDORA_HOCR_SNIPPETS') ?: '20');
   }
 
   /**
