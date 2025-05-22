@@ -37,7 +37,7 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
    */
   public function __construct(
     string $library_path,
-    FieldsHelperInterface $fields_helper
+    FieldsHelperInterface $fields_helper,
   ) {
     $this->libraryPath = $library_path;
     $this->fieldsHelper = $fields_helper;
@@ -141,14 +141,15 @@ EOXML;
     unset($info);
     $sapi_query->setOption('islandora_hocr_properties', $highlight_props);
     $sapi_query->setOption('islandora_hocr_fields', $highlight_fields);
-
     $s_query->setHandler('select_ocr')
       ->addParam('hl', 'true')
       ->addParam('hl.ocr.fl', implode(',', array_keys($highlight_fields)))
       // Deal with absolute image coordinates.
       ->addParam('hl.ocr.absoluteHighlights', 'on')
       // We expect OCR per page.
-      ->addParam('hl.ocr.trackPages', 'off');
+      ->addParam('hl.ocr.trackPages', 'off')
+      // Set the default number of snippets.
+      ->addParam('hl.snippets', getenv('ISLANDORA_HOCR_SNIPPETS') ?: '20');
   }
 
   /**
