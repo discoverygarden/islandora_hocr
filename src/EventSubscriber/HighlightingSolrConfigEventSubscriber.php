@@ -141,14 +141,16 @@ EOXML;
     unset($info);
     $sapi_query->setOption('islandora_hocr_properties', $highlight_props);
     $sapi_query->setOption('islandora_hocr_fields', $highlight_fields);
-
-    $s_query->setHandler('select_ocr')
+    $handler = $s_query->setHandler('select_ocr')
       ->addParam('hl', 'true')
       ->addParam('hl.ocr.fl', implode(',', array_keys($highlight_fields)))
       // Deal with absolute image coordinates.
       ->addParam('hl.ocr.absoluteHighlights', 'on')
       // We expect OCR per page.
       ->addParam('hl.ocr.trackPages', 'off');
+    foreach (array_keys($highlight_fields) as $field) {
+      $handler->addParam("f.$field.hl.snippets", getenv('ISLANDORA_HOCR_SNIPPETS') ?: '20');
+    }
   }
 
   /**

@@ -19,6 +19,11 @@ drush migrate:import islandora_hocr_media_uses
 ```
 
 ## Configuration
+Configuration is presented performed via environment variables.
+
+| Variable                                 | Default                | Description                                                                                                                                        |
+|------------------------------------------|------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ISLANDORA_HOCR_SNIPPETS`                | `20`                   | Number of snippets per document to include in the response.                                                                                        |
 
 
 ### Derivatives
