@@ -2,6 +2,9 @@
 
 namespace Drupal\islandora_hocr\EventSubscriber;
 
+use Composer\Semver\Comparator;
+use Drupal\Core\DependencyInjection\AutowireTrait;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\Utility\FieldsHelperInterface;
 use Drupal\search_api_solr\Event\PostConfigFilesGenerationEvent;
@@ -11,48 +14,32 @@ use Drupal\search_api_solr\Event\SearchApiSolrEvents;
 use Drupal\search_api_solr\SolrBackendInterface;
 use Drupal\search_api_solr\Utility\Utility;
 use Solarium\QueryType\Select\Query\Query;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Highlighting library event subscriber.
  */
-class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface {
+class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface, ContainerInjectionInterface {
 
-  /**
-   * Path to the library to be added to the Solr config.
-   *
-   * @var string
-   */
-  protected string $libraryPath;
-
-  /**
-   * The fields helper service.
-   *
-   * @var \Drupal\search_api\Utility\FieldsHelperInterface
-   */
-  protected FieldsHelperInterface $fieldsHelper;
+  private const ENV_PLUGIN_PATH = 'SOLR_HOCR_PLUGIN_PATH';
+  private const ENV_SNIPPETS = 'ISLANDORA_HOCR_SNIPPETS';
 
   /**
    * Constructor.
    */
   public function __construct(
-    string $library_path,
-    FieldsHelperInterface $fields_helper,
-  ) {
-    $this->libraryPath = $library_path;
-    $this->fieldsHelper = $fields_helper;
-  }
+    protected ?string $libraryPath,
+    protected FieldsHelperInterface $fieldsHelper,
+  ) {}
 
   /**
-   * Static factory.
-   *
-   * @return self
-   *   An instance of this class.
+   * {@inheritDoc}
    */
-  public static function create() : self {
+  public static function create(ContainerInterface $container) : static {
     return new static(
-      getenv('SOLR_HOCR_PLUGIN_PATH'),
-      \Drupal::service('search_api.fields_helper')
+      getenv(static::ENV_PLUGIN_PATH) ?: NULL,
+      $container->get('search_api.fields_helper'),
     );
   }
 
@@ -76,6 +63,14 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface 
   public function addLibraryInfo(PostConfigFilesGenerationEvent $event) : void {
     if (!isset($this->libraryPath)) {
       return;
+    }
+    // XXX: Lucene version is approximately equal to Solr version; should
+    // suffice for comparison, here.
+    if (version_compare($event->getLuceneMatchVersion(), '9.0.0', '>=') && !empty(getenv(static::ENV_PLUGIN_PATH))) {
+      // phpcs:ignore Drupal.Semantics.FunctionTriggerError.TriggerErrorTextLayoutRelaxed
+      @trigger_error(strtr('The specification of <lib/> elements (as for which :var is used) is no longer recommended as of Solr 9. See README.md.', [
+        ':var' => static::ENV_PLUGIN_PATH,
+      ]), E_USER_DEPRECATED);
     }
 
     $files = $event->getConfigFiles();
@@ -149,7 +144,7 @@ EOXML;
       // We expect OCR per page.
       ->addParam('hl.ocr.trackPages', 'off')
       // Set the default number of snippets.
-      ->addParam('hl.snippets', getenv('ISLANDORA_HOCR_SNIPPETS') ?: '20');
+      ->addParam('hl.snippets', getenv(static::ENV_SNIPPETS) ?: '20');
   }
 
   /**

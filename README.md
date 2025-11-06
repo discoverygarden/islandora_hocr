@@ -39,6 +39,7 @@ We expect to make use of the [Solr OCR Highlighting Plugin](https://dbmdz.github
 We have a single environment variable to allow the path of the library on the Solr instance to be specified, such that we can add its path to the configset for Solr:
 
 - `SOLR_HOCR_PLUGIN_PATH`: A path resolvable by Solr to the directory containing the OCR Highlighting Plugin JAR.
+    - NOTE: This is no longer recommended as of Solr 9. Easiest might be to place the plugin JAR directly into Solr's `{solr install}/lib` directory. See [Solr's docs](https://solr.apache.org/guide/solr/latest/configuration-guide/libs.html) for more info.
 
 There are a couple of config entities included:
 - the `islandora_hocr` field type to perform tokenization
