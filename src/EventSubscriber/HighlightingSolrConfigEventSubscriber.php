@@ -2,8 +2,6 @@
 
 namespace Drupal\islandora_hocr\EventSubscriber;
 
-use Composer\Semver\Comparator;
-use Drupal\Core\DependencyInjection\AutowireTrait;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\search_api\Query\QueryInterface;
 use Drupal\search_api\Utility\FieldsHelperInterface;
