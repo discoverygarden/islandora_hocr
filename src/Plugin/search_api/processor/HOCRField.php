@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AnonymousUserSession;
 use Drupal\file\FileInterface;
 use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRFieldProperty;
+use Drupal\islandora_hocr\Plugin\search_api\processor\Property\HOCRException;
 use Drupal\media\Plugin\media\Source\File;
 use Drupal\node\NodeInterface;
 use Drupal\search_api\Datasource\DatasourceInterface;
@@ -13,6 +14,7 @@ use Drupal\search_api\Item\ItemInterface;
 use Drupal\search_api\Plugin\PluginFormTrait;
 use Drupal\search_api\Processor\ProcessorPluginBase;
 use Drupal\search_api\SearchApiException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -43,14 +45,47 @@ class HOCRField extends ProcessorPluginBase {
   protected EntityTypeManagerInterface $entityTypeManager;
 
   /**
+   * Logger channel/service.
+   *
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected LoggerInterface $logger;
+
+  /**
    * {@inheritDoc}
    */
   public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
-    $instance = parent::create($container, $configuration, $plugin_id, $plugin_definition);
+    return parent::create($container, $configuration, $plugin_id, $plugin_definition)
+      ->setEntityTypeManager($container->get('entity_type.manager'))
+      ->setLogger($container->get('logger.channel.islandora_hocr'));
+  }
 
-    $instance->entityTypeManager = $container->get('entity_type.manager');
+  /**
+   * Setter-inject entity type manager.
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager service.
+   *
+   * @return $this
+   *   Fluent API.
+   */
+  public function setEntityTypeManager(EntityTypeManagerInterface $entityTypeManager) : static {
+    $this->entityTypeManager = $entityTypeManager;
+    return $this;
+  }
 
-    return $instance;
+  /**
+   * Setter-ingest logger service.
+   *
+   * @param \Psr\Log\LoggerInterface $logger
+   *   Logger service to use.
+   *
+   * @return $this
+   *   Fluent API.
+   */
+  public function setLogger(LoggerInterface $logger) : static {
+    $this->logger = $logger;
+    return $this;
   }
 
   /**
@@ -104,12 +139,42 @@ class HOCRField extends ProcessorPluginBase {
       $data['file']['value'] ??= $this->getFile($entity);
       return $data['file']['value'];
     };
-    $data['uri']['callable'] = function () use (&$data) {
+    $data['uri']['callable'] = static function () use (&$data) {
       $data['uri']['value'] ??= $data['file']['callable']() ? $data['file']['value']->getFileUri() : NULL;
       return $data['uri']['value'];
     };
-    $data['content']['callable'] = function () use (&$data) {
-      $data['content']['value'] ??= $data['uri']['callable']() ? file_get_contents($data['uri']['value']) : NULL;
+    $file_callback = static function (string $uri) use ($item): string {
+      $contents = file_get_contents($uri);
+      if ($contents === FALSE) {
+        throw new HOCRException(sprintf('Failed to read HOCR found for %s, in %s.', $item->getId(), $uri));
+      }
+      if (empty($contents)) {
+        throw new HOCRException(sprintf('Empty HOCR found for %s, in %s.', $item->getId(), $uri));
+      }
+
+      $dom = new \DOMDocument('1.0', 'UTF-8');
+      if (!$dom->loadXML($contents)) {
+        throw new HOCRException(sprintf(
+          'Invalid HOCR found for %s, in %s. Verbose error output: %s',
+          $item->getId(),
+          $uri,
+          implode(', ', array_map(static function (\LibXMLError $error) {
+            return sprintf(
+              '%s: %s',
+              match($error->level) {
+                LIBXML_ERR_WARNING => 'Warning',
+                LIBXML_ERR_ERROR => 'Error',
+                LIBXML_ERR_FATAL => 'Fatal error',
+              },
+              $error->message,
+            );
+          }, \libxml_get_errors()))
+        ));
+      }
+      return $contents;
+    };
+    $data['content']['callable'] = static function () use (&$data, $file_callback) {
+      $data['content']['value'] ??= $data['uri']['callable']() ? $file_callback($data['uri']['value']) : NULL;
       return $data['content']['value'];
     };
 
@@ -126,7 +191,12 @@ class HOCRField extends ProcessorPluginBase {
         if (!$field->getValues()) {
           // Lazily load content from entity, as the field might already be
           // populated.
-          $field->addValue($info['callable']());
+          try {
+            $field->addValue($info['callable']());
+          }
+          catch (HOCRException $e) {
+            $this->logger->warning($e->getMessage());
+          }
         }
       }
     }
