@@ -160,7 +160,7 @@ class HOCRField extends ProcessorPluginBase {
             'Invalid HOCR found for %s, in %s. Verbose error output: %s',
             $item->getId(),
             $uri,
-            implode(', ', array_map(static function(\LibXMLError $error) {
+            implode(', ', array_map(static function (\LibXMLError $error) {
               return sprintf(
                 '%s: %s',
                 match ($error->level) {
