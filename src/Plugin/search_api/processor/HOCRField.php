@@ -155,7 +155,7 @@ class HOCRField extends ProcessorPluginBase {
       $previous = \libxml_use_internal_errors(TRUE);
       try {
         $dom = new \DOMDocument('1.0', 'UTF-8');
-        if (!@$dom->loadXML($contents, LIBXML_NONET)) {
+        if (!@$dom->loadXML($contents, LIBXML_NONET | LIBXML_PARSEHUGE | LIBXML_COMPACT)) {
           throw new HOCRException(sprintf(
             'Invalid HOCR found for %s, in %s. Verbose error output: %s',
             $item->getId(),
