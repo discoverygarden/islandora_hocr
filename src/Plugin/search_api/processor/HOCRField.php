@@ -75,7 +75,7 @@ class HOCRField extends ProcessorPluginBase {
   }
 
   /**
-   * Setter-ingest logger service.
+   * Setter-inject logger service.
    *
    * @param \Psr\Log\LoggerInterface $logger
    *   Logger service to use.
