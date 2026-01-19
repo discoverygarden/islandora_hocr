@@ -152,24 +152,32 @@ class HOCRField extends ProcessorPluginBase {
         throw new HOCRException(sprintf('Empty HOCR found for %s, in %s.', $item->getId(), $uri));
       }
 
-      $dom = new \DOMDocument('1.0', 'UTF-8');
-      if (!$dom->loadXML($contents)) {
-        throw new HOCRException(sprintf(
-          'Invalid HOCR found for %s, in %s. Verbose error output: %s',
-          $item->getId(),
-          $uri,
-          implode(', ', array_map(static function (\LibXMLError $error) {
-            return sprintf(
-              '%s: %s',
-              match($error->level) {
-                LIBXML_ERR_WARNING => 'Warning',
-                LIBXML_ERR_ERROR => 'Error',
-                LIBXML_ERR_FATAL => 'Fatal error',
-              },
-              $error->message,
-            );
-          }, \libxml_get_errors()))
-        ));
+      $previous = \libxml_use_internal_errors(TRUE);
+      try {
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        if (!@$dom->loadXML($contents, LIBXML_NONET)) {
+          throw new HOCRException(sprintf(
+            'Invalid HOCR found for %s, in %s. Verbose error output: %s',
+            $item->getId(),
+            $uri,
+            implode(', ', array_map(static function(\LibXMLError $error) {
+              return sprintf(
+                '%s: %s',
+                match ($error->level) {
+                  LIBXML_ERR_WARNING => 'Warning',
+                  LIBXML_ERR_ERROR => 'Error',
+                  LIBXML_ERR_FATAL => 'Fatal error',
+                },
+                $error->message,
+              );
+            }, \libxml_get_errors()))
+          ));
+        }
+      }
+      finally {
+        \libxml_clear_errors();
+        // Restore the previous configuration.
+        \libxml_use_internal_errors($previous);
       }
       return $contents;
     };
