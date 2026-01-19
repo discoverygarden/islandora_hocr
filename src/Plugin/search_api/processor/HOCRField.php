@@ -92,7 +92,7 @@ class HOCRField extends ProcessorPluginBase {
    * {@inheritDoc}
    */
   public function getPropertyDefinitions(?DatasourceInterface $datasource = NULL) {
-    if (!$datasource || $datasource->getEntityTypeId() != 'node') {
+    if (!$datasource || $datasource->getEntityTypeId() !== 'node') {
       return [];
     }
 
@@ -114,9 +114,9 @@ class HOCRField extends ProcessorPluginBase {
    */
   public function addFieldValues(ItemInterface $item) {
     try {
-      $entity = $item->getOriginalObject()->getValue();
+      $entity = $item->getOriginalObject()?->getValue();
     }
-    catch (SearchApiException $e) {
+    catch (SearchApiException) {
       return;
     }
 
