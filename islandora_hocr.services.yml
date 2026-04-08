@@ -6,3 +6,6 @@ services:
     arguments: ['@service_container']
     tags:
       - name: event_subscriber
+  logger.channel.islandora_hocr:
+    parent: logger.channel_base
+    arguments: ['islandora_hocr']
