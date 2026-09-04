@@ -5,4 +5,3 @@ type: module
 core_version_requirement: ^10 || ^11
 dependencies:
   - islandora:islandora
-  - search_api_solr:search_api_solr
