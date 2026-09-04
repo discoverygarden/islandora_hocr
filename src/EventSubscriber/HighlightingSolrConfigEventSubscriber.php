@@ -45,11 +45,21 @@ class HighlightingSolrConfigEventSubscriber implements EventSubscriberInterface,
    * {@inheritDoc}
    */
   public static function getSubscribedEvents() {
-    return [
-      SearchApiSolrEvents::POST_CONFIG_FILES_GENERATION => 'addLibraryInfo',
-      SearchApiSolrEvents::PRE_QUERY => 'preQuery',
-      SearchApiSolrEvents::POST_EXTRACT_RESULTS => 'postExtractResults',
-    ];
+    $events = [];
+
+    // XXX: Guard against search_api_solr not being installed: this is called
+    // at container-compile time, which can happen before search_api_solr's
+    // namespace is registered. Our container is rebuilt once it is installed,
+    // at which point the events register as normal.
+    if (class_exists(SearchApiSolrEvents::class)) {
+      $events += [
+        SearchApiSolrEvents::POST_CONFIG_FILES_GENERATION => 'addLibraryInfo',
+        SearchApiSolrEvents::PRE_QUERY => 'preQuery',
+        SearchApiSolrEvents::POST_EXTRACT_RESULTS => 'postExtractResults',
+      ];
+    }
+
+    return $events;
   }
 
   /**
